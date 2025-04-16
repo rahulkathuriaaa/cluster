@@ -1,0 +1,22 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Robot head -->
+  <ellipse cx="60" cy="60" rx="40" ry="42" fill="#101628" stroke="#1A2542" stroke-width="2"/>
+  
+  <!-- Visor/face area -->
+  <path d="M37 59C37 51.268 43.268 45 51 45H69C76.732 45 83 51.268 83 59V69C83 76.732 76.732 83 69 83H51C43.268 83 37 76.732 37 69V59Z" fill="#1B203E"/>
+  
+  <!-- Eyes -->
+  <rect x="47" y="61" width="8" height="8" rx="1" fill="#FF0000"/>
+  <rect x="65" y="61" width="8" height="8" rx="1" fill="#FF0000"/>
+  
+  <!-- Helmet details - more armored looking -->
+  <path d="M35 45C35 45 45 25 60 25C75 25 85 45 85 45" stroke="#1A2542" stroke-width="3"/>
+  <path d="M38 70C38 70 35 90 60 90C85 90 82 70 82 70" stroke="#1A2542" stroke-width="2"/>
+  
+  <!-- Side armor pieces -->
+  <path d="M30 50C30 50 25 60 25 70C25 80 30 85 30 85" stroke="#1A2542" stroke-width="3"/>
+  <path d="M90 50C90 50 95 60 95 70C95 80 90 85 90 85" stroke="#1A2542" stroke-width="3"/>
+  
+  <!-- Blue glow at bottom -->
+  <ellipse cx="60" cy="95" rx="30" ry="5" fill="#2763f8" fill-opacity="0.3"/>
+</svg> 

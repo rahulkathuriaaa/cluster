@@ -1,0 +1,36 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Robot head - larger size, no outer circle -->
+  <ellipse cx="100" cy="95" rx="55" ry="60" fill="#1A1F44" stroke="#2D3163" stroke-width="2"/>
+  
+  <!-- Visor/face area - larger -->
+  <path d="M70 94C70 86.268 76.268 80 84 80H116C123.732 80 130 86.268 130 94V106C130 113.732 123.732 120 116 120H84C76.268 120 70 113.732 70 106V94Z" fill="#2A3070"/>
+  
+  <!-- Eyes - larger and bright yellow -->
+  <rect x="85" y="97" width="10" height="10" rx="2" fill="#FFCC00"/>
+  <rect x="105" y="97" width="10" height="10" rx="2" fill="#FFCC00"/>
+  
+  <!-- Helmet details - smoother and more defined -->
+  <path d="M75 75C75 75 80 60 100 60C120 60 125 75 125 75" stroke="#2D3163" stroke-width="2.5"/>
+  <path d="M73 110C73 110 70 135 100 135C130 135 127 110 127 110" stroke="#2D3163" stroke-width="2.5"/>
+  
+  <!-- Neck/base -->
+  <rect x="90" y="135" width="20" height="15" rx="2" fill="#1A1F44" stroke="#2D3163" stroke-width="1.5"/>
+  
+  <!-- Purple glow under the robot - enhanced with multiple layers -->
+  <ellipse cx="100" cy="155" rx="40" ry="5" fill="#8B5CF6" fill-opacity="0.2"/>
+  <ellipse cx="100" cy="155" rx="30" ry="3" fill="#8B5CF6" fill-opacity="0.5"/>
+  <ellipse cx="100" cy="155" rx="20" ry="2" fill="#8B5CF6" fill-opacity="0.7"/>
+
+  <!-- Subtle reflection on the ground beneath -->
+  <ellipse cx="100" cy="155" rx="15" ry="1" fill="#FFFFFF" fill-opacity="0.2"/>
+  
+  <!-- Subtle inner glow on robot for better visibility -->
+  <ellipse cx="100" cy="95" rx="45" ry="50" fill="url(#paint0_radial)" fill-opacity="0.1"/>
+  
+  <defs>
+    <radialGradient id="paint0_radial" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(100 95) rotate(90) scale(50 45)">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#1A1F44" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg> 
