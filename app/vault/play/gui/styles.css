@@ -1,0 +1,34 @@
+/* Custom scrollbar styling */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: rgba(17, 17, 17, 0.6);
+  border-radius: 3px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: #FFD700;
+  border-radius: 3px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: #e6c300;
+}
+
+/* For Firefox */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: #FFD700 rgba(17, 17, 17, 0.6);
+}
+
+/* Make the scrollbar container always show scrollbar width space */
+.scrollbar-custom {
+  padding-right: 2px;
+}
+
+/* Auto-scroll to bottom behavior */
+.scrollbar-custom {
+  scroll-behavior: smooth;
+} 
