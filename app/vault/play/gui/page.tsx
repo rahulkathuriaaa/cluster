@@ -4,8 +4,16 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import {
+    useWallet,
+  } from "@aptos-labs/wallet-adapter-react";
+  import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
+
+import { WalletSelector } from "@aptos-labs/wallet-adapter-ant-design";
 
 export default function ZuraVaultInterface() {
+    const { account, connected, signAndSubmitTransaction } = useWallet();
+
   const router = useRouter();
   const [message, setMessage] = useState('');
   const [credits, setCredits] = useState(0);
@@ -92,6 +100,9 @@ export default function ZuraVaultInterface() {
           </div>
           
           <div className="mt-auto">
+            <WalletSelector />
+
+            
             <button className="w-full bg-[#0a0a0a] border border-[#FFD700] text-[#FFD700] p-3 mb-4 text-sm font-bold hover:bg-[#111] transition-colors">
               [ {5 - credits} ATTEMPTS USED ]
             </button>

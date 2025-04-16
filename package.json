@@ -9,6 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aptos-labs/ts-sdk": "^1.38.0",
+    "@aptos-labs/wallet-adapter-ant-design": "^3.0.1",
+    "@aptos-labs/wallet-adapter-react": "^3.5.1",
+    "petra-plugin-wallet-adapter": "^0.4.5",
+    "lucide-react": "^0.488.0",
     "next": "15.3.0",
     "next-auth": "^4.24.11",
     "react": "^19.0.0",
