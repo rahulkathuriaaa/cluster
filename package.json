@@ -20,6 +20,7 @@
     "@telegram-apps/bridge": "^2.7.0",
     "ai": "^3.4.33",
     "clsx": "^2.1.1",
+    "graphql-request": "^7.1.2",
     "isomorphic-dompurify": "^2.23.0",
     "lucide-react": "^0.488.0",
     "marked": "^15.0.8",
