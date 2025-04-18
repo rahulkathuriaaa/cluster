@@ -12,23 +12,20 @@
     "@aptos-labs/ts-sdk": "^1.38.0",
     "@aptos-labs/wallet-adapter-ant-design": "^3.0.1",
     "@aptos-labs/wallet-adapter-react": "^3.5.1",
-    "petra-plugin-wallet-adapter": "^0.4.5",
+    "@langchain/anthropic": "^0.3.12",
+    "@langchain/core": "^0.3.32",
+    "@langchain/langgraph": "^0.2.41",
+    "@langchain/openai": "^0.5.4",
+    "ai": "^3.4.33",
     "lucide-react": "^0.488.0",
+    "move-agent-kit": "^0.1.2",
     "next": "15.3.0",
     "next-auth": "^4.24.11",
+    "openai-edge": "^1.2.2",
+    "petra-plugin-wallet-adapter": "^0.4.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "ai": "^3.4.33",
-    "zod": "^3.24.2",
-    "move-agent-kit": "^0.1.2",
-   	"@langchain/anthropic": "^0.3.12",
-		"@langchain/core": "^0.3.32",
-		"@langchain/langgraph": "^0.2.41",
-		"@langchain/openai": "^0.5.4"
-
-
-
-
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

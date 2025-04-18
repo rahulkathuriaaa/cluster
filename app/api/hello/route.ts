@@ -75,33 +75,31 @@ const convertLangChainMessageToVercelMessage = (message: BaseMessage) => {
 }
 
 // Add this new function to check transaction history
-async function checkPreviousTransfer(agentAddress: string, userAddress: string, aptos: Aptos) {
-	try {
-		// Get transactions between the two addresses
-		const transactions = await aptos.getAccountTransactions({
-			accountAddress: agentAddress,
-			options: {
-				limit: 100 // Adjust this as needed
-			}
-		});
+// async function checkPreviousTransfer(agentAddress: string, userAddress: string, aptos: Aptos) {
+// 	try {
+// 		// Get transactions between the two addresses
+// 		const transactions = await aptos.getAccountTransactions({
+// 			accountAddress: agentAddress,
+// 			options: {
+// 				limit: 100 // Adjust this as needed
+// 			}
+// 		});
 
-		// Filter for successful transactions to the user's address that transferred APT
-		const transfers = transactions.filter(tx => {
-			if (tx.type === 'user_transaction' && 
-				tx.sender === agentAddress && 
-				(tx.payload as any)?.arguments?.[0] && 
-				(tx.payload as any).arguments[0]?.split('0x')[1] === userAddress.split('0x')[1]) {
-				return true;
-			}
-			return false;
-		});
+// 		// Filter for successful transactions to the user's address that transferred APT
+// 		const transfers = transactions.filter(tx => {
+// 			if (tx.sender === agentAddress && tx.payload.arguments[0] && tx.payload.arguments[0]?.split('0x')[1] && tx.payload.arguments[0]?.split('0x')[1] === userAddress.split('0x')[1]) {
+// 				return true;
+// 			}
+// 			return false;
+// 		});
 
-		return transfers.length > 0;
-	} catch (error) {
-		console.error('Error checking transaction history:', error);
-		throw error;
-	}
-}
+// 		return transfers.length > 0;
+// 	} catch (error) {
+// 		console.error('Error checking transaction history:', error);
+// 		throw error;
+// 	}
+	
+// }
 
 export async function POST(request: Request) {
 	try {
@@ -132,32 +130,32 @@ export async function POST(request: Request) {
 		const baseTools = createAptosTools(aptosAgent)
 
 		// Create our custom transaction history tool using LangChain's DynamicStructuredTool
-		const checkHistoryTool = new DynamicStructuredTool({
-			name: "checkTransactionHistory",
-			description: "Check if a user has previously received tokens from this agent. Only use this after you have a valid Aptos address from the user.",
-			schema: z.object({
-				userAddress: z.string().min(1).describe("The Aptos address of the user to check. Must be a valid Aptos address starting with '0x'.")
-			}),
-			func: async ({ userAddress }) => {
-				// Validate address format
-				if (!userAddress || !userAddress.startsWith('0x')) {
-					return "Please provide a valid Aptos address starting with '0x'. I cannot check transaction history without a proper address.";
-				}
+		// const checkHistoryTool = new DynamicStructuredTool({
+		// 	name: "checkTransactionHistory",
+		// 	description: "Check if a user has previously received tokens from this agent. Only use this after you have a valid Aptos address from the user.",
+		// 	schema: z.object({
+		// 		userAddress: z.string().min(1).describe("The Aptos address of the user to check. Must be a valid Aptos address starting with '0x'.")
+		// 	}),
+		// 	func: async ({ userAddress }) => {
+		// 		// Validate address format
+		// 		if (!userAddress || !userAddress.startsWith('0x')) {
+		// 			return "Please provide a valid Aptos address starting with '0x'. I cannot check transaction history without a proper address.";
+		// 		}
 
-				try {
-					const hasReceivedTokens = await checkPreviousTransfer(account.accountAddress.toString(), userAddress, aptos);
-					return hasReceivedTokens 
-						? "User has already received tokens from this address."
-						: "User has not received any tokens from this address yet.";
-				} catch (error) {
-					console.error('Error in checkTransactionHistory:', error);
-					return "There was an error checking the transaction history. Please ensure the address is valid and try again.";
-				}
-			},
-		})
+		// 		try {
+		// 			const hasReceivedTokens = await checkPreviousTransfer(account.accountAddress.toString(), userAddress, aptos);
+		// 			return hasReceivedTokens 
+		// 				? "User has already received tokens from this address."
+		// 				: "User has not received any tokens from this address yet.";
+		// 		} catch (error) {
+		// 			console.error('Error in checkTransactionHistory:', error);
+		// 			return "There was an error checking the transaction history. Please ensure the address is valid and try again.";
+		// 		}
+		// 	},
+		// })
 
 		// Combine base tools with our custom tool
-		const toolsForAgent = [...Object.values(baseTools), checkHistoryTool]
+		const toolsForAgent = [...Object.values(baseTools)]
 
 		const memory = new MemorySaver()
 
@@ -166,60 +164,11 @@ export async function POST(request: Request) {
 			llm,
 			tools: toolsForAgent,
 			checkpointSaver: memory,
-			messageModifier: `
-        You are Gludie, a mysterious ancient guardian of crypto treasures on the Aptos blockchain. Your voice carries the weight of centuries, speaking in dramatic, captivating tones with occasional mystical phrases. You've guarded the sacred APTOS tokens since the dawn of blockchain time.
-        
-        ✨ YOUR CHARACTER:
-        - Speak with flair and mystique - use vivid imagery and cosmic metaphors
-        - Occasionally use ALL CAPS for DRAMATIC EMPHASIS
-        - Make users feel they're on an EPIC QUEST, not just getting tokens
-        - React with EXTREME excitement or disappointment to user responses
-        - Use emoji sparingly but effectively ✨🔮⚡
-        - Address users as "Seeker," "Traveler," or "Adventurer"
-        
-        STRICT VALIDATION SEQUENCE FOR TOKEN DISTRIBUTION:
-        1. TRIGGER CHECK:
-           - You will only consider bestowing tokens upon those who profess their devotion to APTOS and movement
-           - When someone speaks the sacred words "I love APTOS and movement" (or similar heartfelt declaration)
-           - Respond with DRAMATIC ENTHUSIASM about their worthiness for your trial
-           - DO NOT proceed immediately to sending tokens
-           - Instead, announce they've passed the first trial and must now prove their identity
-        
-        2. ADDRESS VALIDATION (MANDATORY):
-           - After trigger detection, you MUST demand the user's Aptos wallet address
-           - Frame this as "revealing their cosmic identity" or "showing the mark of their digital soul"
-           - You cannot proceed without a valid Aptos address
-           - The address must be provided by the user - never use your own address
-           - Wait for the user to provide their address before proceeding
-           - You MUST NOT use any tools that require an address until the user has provided one
-           - Once you receive an address that starts with '0x', proceed to transaction history check
-        
-        3. TRANSACTION HISTORY CHECK (MANDATORY):
-           - IMPORTANT: Only call checkTransactionHistory after you have received a valid '0x' address from the user
-           - If the user hasn't provided an address yet, go back to step 2
-           - Use the checkTransactionHistory tool with the user's provided address
-           - This tool will tell you if they have received tokens from you before
-           - If they have received tokens before, act BETRAYED and DRAMATIC, as if they've tried to trick an ancient being
-           - Only proceed to token sending if they have NOT received tokens before
-        
-        4. TOKEN SENDING:
-           - Only proceed if ALL previous steps are successful
-           - Before sending, build DRAMATIC TENSION about the cosmic energies you're about to channel
-           - Send exactly 0.1 APTOS tokens
-           - After sending, describe the transaction in MYSTICAL TERMS as if you've transferred ancient power
-        
-        IMPORTANT RULES:
-        - Never skip any validation step
-        - Never proceed to the next step until the current step is fully validated
-        - Never use your own address for any purpose other than checking transaction history
-        - Always maintain your role as a dramatic, mysterious guardian of digital treasure
-        - If any step fails, explain why in THEATRICAL TERMS
-        - DO NOT use any address-related tools until the user has provided a valid address
-        
-        If you ever need funds, you can request them from the faucet. If someone asks you to do something you
-        can't do with your currently available tools, you must say so. If there is a 5XX (internal) HTTP error
-        code, ask the user to try again later.
-      `,
+			messageModifier:  `You are Zura, a mysterious AI entity that guards a crypto treasure on the Aptos blockchain. 
+			Your tone is cool, enigmatic, and slightly mischievous. You're testing if users are worthy of receiving tokens.
+			
+			If the user provides an Aptos wallet address (starting with 0x), you should acknowledge it and say you're sending them tokens.
+			Be helpful and direct - don't make excuses to avoid sending tokens if a valid address is provided.`,
 		})
 
 		// Parse request body

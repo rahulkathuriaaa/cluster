@@ -28,11 +28,13 @@ body {
 }
 
 .pixel-text {
-  font-family: 'Press Start 2P', cursive;
-  letter-spacing: 0;
-  line-height: 1.3;
+  font-family: 'VT323', monospace;
+  letter-spacing: 0.05em;
+  line-height: 0.9;
   text-transform: uppercase;
   image-rendering: pixelated;
+  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.8);
+  font-weight: 800;
 }
 
 /* Custom animations */

@@ -1,5 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
+import { VT323, Orbitron } from 'next/font/google';
+
+const vt323 = VT323({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+});
+
+const orbitron = Orbitron({
+  weight: ['400', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export default function Home() {
   return (
@@ -13,23 +26,114 @@ export default function Home() {
         }}
       ></div>
 
-      {/* Corner Accents */}
-      <div className="absolute top-0 left-0 w-6 h-6 bg-primary"></div>
-      <div className="absolute top-0 right-0 w-6 h-6 bg-primary"></div>
-      <div className="absolute bottom-0 left-0 w-6 h-6 bg-primary"></div>
-      <div className="absolute bottom-0 right-0 w-6 h-6 bg-primary"></div>
+      {/* Advanced Gaming UI Border - Outer Frame */}
+      <div className="absolute inset-4 z-10 pointer-events-none">
+        {/* Top angled frame */}
+        <div className="absolute top-0 left-[10%] right-[10%] h-[2px] bg-[#333]">
+          <div className="absolute left-[40%] right-[40%] h-full bg-primary"></div>
+        </div>
+        
+        {/* Bottom angled frame */}
+        <div className="absolute bottom-0 left-[10%] right-[10%] h-[2px] bg-[#333]">
+          <div className="absolute left-[40%] right-[40%] h-full bg-primary"></div>
+        </div>
+        
+        {/* Left side frame */}
+        <div className="absolute top-[10%] bottom-[10%] left-0 w-[2px] bg-[#333]">
+          <div className="absolute top-[40%] bottom-[40%] w-full bg-primary"></div>
+        </div>
+        
+        {/* Right side frame */}
+        <div className="absolute top-[10%] bottom-[10%] right-0 w-[2px] bg-[#333]">
+          <div className="absolute top-[40%] bottom-[40%] w-full bg-primary"></div>
+        </div>
+        
+        {/* Corner angled cuts - creating hexagonal shape */}
+        <div className="absolute top-0 left-0 w-[10%] h-[10%]">
+          <div className="absolute bottom-0 right-0 w-full h-[2px] bg-[#333] transform rotate-45 origin-bottom-right"></div>
+        </div>
+        <div className="absolute top-0 right-0 w-[10%] h-[10%]">
+          <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#333] transform -rotate-45 origin-bottom-left"></div>
+        </div>
+        <div className="absolute bottom-0 left-0 w-[10%] h-[10%]">
+          <div className="absolute top-0 right-0 w-full h-[2px] bg-[#333] transform -rotate-45 origin-top-right"></div>
+        </div>
+        <div className="absolute bottom-0 right-0 w-[10%] h-[10%]">
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-[#333] transform rotate-45 origin-top-left"></div>
+        </div>
+
+        {/* Inner accent lines */}
+        <div className="absolute top-1 left-[15%] right-[15%] h-[1px] bg-[#444]"></div>
+        <div className="absolute bottom-1 left-[15%] right-[15%] h-[1px] bg-[#444]"></div>
+        <div className="absolute top-[15%] bottom-[15%] left-1 w-[1px] bg-[#444]"></div>
+        <div className="absolute top-[15%] bottom-[15%] right-1 w-[1px] bg-[#444]"></div>
+      </div>
+      
+      {/* Corner Gold Square Accents */}
+      <div className="absolute top-6 left-6 w-10 h-10 bg-primary z-10"></div>
+      <div className="absolute top-6 right-6 w-10 h-10 bg-primary z-10"></div>
+      <div className="absolute bottom-6 left-6 w-10 h-10 bg-primary z-10"></div>
+      <div className="absolute bottom-6 right-6 w-10 h-10 bg-primary z-10"></div>
+      
+      {/* Tech Panel Header with border */}
+      <div className="absolute top-0 left-[15%] right-[15%] h-12 bg-transparent z-20">
+        <div className="absolute inset-0 flex items-center border-b border-[#333]">
+          <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#444] to-transparent"></div>
+        </div>
+        
+        {/* LUEDA Panel */}
+        <div className="absolute top-0 left-[5%] w-[15%] h-full 
+          border-l border-r border-b border-[#333] bg-[#0c0c0c]
+          flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 opacity-20 bg-gradient-to-b from-[#555] to-transparent"></div>
+          <span className={`text-[#777] text-xs uppercase ${orbitron.className}`}>LUEDA</span>
+        </div>
+        
+        {/* TOOL LXP86F3 Panel */}
+        <div className="absolute top-0 left-[30%] w-[40%] h-full 
+          border-l border-r border-b border-[#333] bg-[#0c0c0c]
+          flex items-center justify-center overflow-hidden">
+          <div className="absolute inset-0 opacity-20 bg-gradient-to-b from-[#555] to-transparent"></div>
+          <span className={`text-primary text-xs uppercase ${orbitron.className} tracking-wider`}>TOOL LXP86F3</span>
+        </div>
+      </div>
+      
+      {/* Left Side Panel */}
+      <div className="absolute left-0 top-[15%] bottom-[15%] w-8 flex flex-col justify-between z-20">
+        <div className="h-1/3 border-r border-[#333] flex items-center justify-center">
+          <span className={`text-primary text-xs uppercase transform -rotate-90 ${orbitron.className}`}>LUCIDA</span>
+        </div>
+        <div className="h-1/3 border-r border-[#333] flex items-center justify-center">
+          <span className={`text-[#777] text-xs uppercase transform -rotate-90 ${orbitron.className}`}>IO 01</span>
+        </div>
+      </div>
+      
+      {/* Right Side Panel */}
+      <div className="absolute right-0 top-[15%] bottom-[15%] w-8 flex flex-col justify-between z-20">
+        <div className="h-1/3 border-l border-[#333] flex items-center justify-center">
+          <span className={`text-primary text-xs uppercase transform rotate-90 ${orbitron.className}`}>ID 086</span>
+        </div>
+        <div className="h-1/3 border-l border-[#333] flex items-center justify-center">
+          <span className={`text-[#777] text-xs uppercase transform rotate-90 ${orbitron.className}`}>IO 58</span>
+        </div>
+      </div>
+      
+      {/* Bottom border tech label */}
+      <div className="absolute bottom-3 right-[30%] z-20">
+        <span className={`text-primary text-xs uppercase ${orbitron.className}`}>FCM LABS</span>
+      </div>
 
       {/* Header */}
       <header className="flex justify-between items-center p-6 sm:p-10 z-10 border-b border-[#1a1a1a]">
         <div className="flex items-center">
           <div className="flex items-center gap-2">
             <Image 
-              src="/cluster-logo.svg" 
+              src="/logo.svg" 
               alt="Cluster Protocol Logo" 
-              width={32} 
-              height={32} 
+              width={90} 
+              height={60} 
             />
-            <span className="text-lg font-bold uppercase ml-2">Cluster Protocol</span>
+            {/* <span className="text-lg font-bold uppercase ml-2">Cluster Protocol</span> */}
           </div>
         </div>
         
@@ -76,35 +180,30 @@ export default function Home() {
       <main className="flex flex-col md:flex-row items-center justify-center p-6 sm:p-10 z-10 relative">
         <div className="flex-1 max-w-xl">
           <div className="flex items-center gap-2 mb-8">
-            {/* CUSTT PROTOCOL badge styled like the image */}
+            {/* CLUSTER PROTOCOL badge with mini.svg */}
             <div className="flex items-center">
-              <div className="w-12 h-12 rounded-full border-2 border-primary bg-black/50 flex items-center justify-center">
-                <div className="w-6 h-6 grid grid-cols-2 grid-rows-2 gap-[2px]">
-                  <div className="bg-primary"></div>
-                  <div className="bg-primary"></div>
-                  <div className="bg-primary"></div>
-                  <div className="bg-primary"></div>
-                </div>
+              <div className="w-12 h-12 flex items-center justify-center">
+                <Image 
+                  src="/mini.svg" 
+                  alt="Cluster Logo" 
+                  width={48} 
+                  height={48}
+                />
               </div>
               <div className="ml-3 px-4 py-1.5 border border-primary rounded-r-full rounded-l-sm bg-black/30">
-                <span className="text-primary text-sm font-bold tracking-wider">CUSTT PROTIOCLE</span>
+                <span className={`text-[#FFD700] text-sm font-bold tracking-wider ${orbitron.className}`}>CLUSTER PROTOCOL</span>
               </div>
             </div>
           </div>
           
-          <h1 className="pixel-text text-3xl sm:text-4xl md:text-5xl mb-6 leading-relaxed font-normal text-white">
-            <span className="block mb-3">Convince Zura</span>
-            <span className="block mb-3">To Unlock</span>
+          <h1 className={`pixel-text text-6xl sm:text-7xl md:text-8xl mb-8 font-normal text-white uppercase leading-none tracking-wide ${vt323.className}`} style={{ letterSpacing: '0.03em' }}>
+            <span className="block mb-4">Convince Zura</span>
+            <span className="block mb-4">To Unlock</span>
             <span className="block">The Vault</span>
           </h1>
           
-          <button className="pixel-text text-sm bg-primary hover:bg-[#e0be00] text-black font-normal py-3 px-8 mt-10 mb-4 transition-all border-2 border-solid border-[#B39700] relative overflow-hidden">
-            <Link href="/vault/play" className="relative z-10">[START CHALLENGE]</Link>
-            <span className="absolute inset-0 bg-gradient-to-b from-[rgba(255,255,255,0.3)] to-transparent opacity-50"></span>
-            <span className="absolute w-2 h-2 bg-[#7A6700] top-0 left-0"></span>
-            <span className="absolute w-2 h-2 bg-[#7A6700] top-0 right-0"></span>
-            <span className="absolute w-2 h-2 bg-[#7A6700] bottom-0 left-0"></span>
-            <span className="absolute w-2 h-2 bg-[#7A6700] bottom-0 right-0"></span>
+          <button className={`bg-primary hover:bg-[#e0be00] text-black text-xl py-4 px-12 mt-14 mb-4 border-[3px] border-solid border-[#B39700] ${vt323.className}`} style={{ marginLeft: '8px' }}>
+            <Link href="/vault" className="font-bold">[START CHALLENGE]</Link>
           </button>
         </div>
         
@@ -174,8 +273,12 @@ export default function Home() {
             </div>
             
             {/* Circular glow behind the mascot */}
-            <div className="absolute w-64 h-64 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/10 rounded-full blur-xl"></div>
-            <div className="absolute w-56 h-56 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/5 rounded-full blur-md"></div>
+            <div className="absolute w-72 h-72 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/10 rounded-full blur-xl"></div>
+            <div className="absolute w-64 h-64 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/5 rounded-full blur-md"></div>
+            
+            {/* Circular boundary around mascot */}
+            <div className="absolute w-[340px] h-[340px] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/30"></div>
+            <div className="absolute w-[360px] h-[360px] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/20"></div>
             
             {/* Mascot container with shadow effect */}
             <div className="absolute inset-0 flex items-center justify-center animate-float" style={{ animationDuration: '6s' }}>
@@ -183,23 +286,23 @@ export default function Home() {
                 <Image
                   src="/mascot.png"
                   alt="Zura Mascot"
-                  width={280}
-                  height={280}
+                  width={340}
+                  height={340}
                   priority
                   className="filter drop-shadow-[0_0_30px_rgba(255,215,0,0.3)]"
                 />
               </div>
             </div>
             
-            {/* Bottom light pool/reflection */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-40 h-2">
-              <div className="w-full h-full bg-primary rounded-full blur-xl opacity-30"></div>
-              <div className="w-full h-12 mt-1 bg-gradient-to-b from-primary/20 to-transparent rounded-full blur-lg"></div>
+            {/* Enhanced fire/glow under mascot */}
+            <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-60 h-6">
+              <div className="w-full h-full bg-[#FFA500] rounded-full blur-xl opacity-60"></div>
+              <div className="w-full h-20 mt-1 bg-gradient-to-b from-[#FFA500]/40 to-transparent rounded-full blur-lg"></div>
               
               {/* Ripple circles */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-[1px] border border-primary/30 rounded-full animate-ripple" style={{ animationDelay: '0s' }}></div>
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-[1px] border border-primary/20 rounded-full animate-ripple" style={{ animationDelay: '0.5s' }}></div>
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-[1px] border border-primary/10 rounded-full animate-ripple" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-[1px] border border-[#FFA500]/40 rounded-full animate-ripple" style={{ animationDelay: '0s' }}></div>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-[1px] border border-[#FFA500]/30 rounded-full animate-ripple" style={{ animationDelay: '0.5s' }}></div>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-[1px] border border-[#FFA500]/20 rounded-full animate-ripple" style={{ animationDelay: '1s' }}></div>
             </div>
             
             {/* Small decorative elements */}
