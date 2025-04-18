@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-   "build": "next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -16,6 +16,8 @@
     "@langchain/core": "^0.3.32",
     "@langchain/langgraph": "^0.2.41",
     "@langchain/openai": "^0.5.4",
+    "@mizuwallet-sdk/core": "^1.4.0",
+    "@telegram-apps/bridge": "^2.7.0",
     "ai": "^3.4.33",
     "clsx": "^2.1.1",
     "isomorphic-dompurify": "^2.23.0",
