@@ -1,7 +1,10 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  webpack: (config: any, { isServer }: { isServer: boolean }) => {
+    // Mock the missing module
+    config.resolve.alias['@tailwindcss/postcss'] = require.resolve('./tailwindcss-fix.js');
+    return config;
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
