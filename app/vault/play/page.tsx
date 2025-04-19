@@ -234,7 +234,7 @@ export default function VaultPlay() {
         
         {/* Main heading - CLUSTER PROTOCOL */}
         <div className="flex justify-center py-4">
-          <h1 className="text-5xl font-bold text-white tracking-widest">CLUSTER PROTOCOL</h1>
+          <h1 className="text-4xl sm:text-5xl text-center font-bold text-white tracking-widest">CLUSTER PROTOCOL</h1>
         </div>
         
         {/* Main content grid */}
@@ -270,10 +270,10 @@ export default function VaultPlay() {
                   alt="AI Mascot"
                   width={250}
                   height={250}
-                  className="object-contain filter drop-shadow-[0_0_30px_rgba(128,0,255,0.6)]"
+                  className="object-contain filter drop-shadow-[0_0_30px_rgba(255,215,0,0.4)]"
                   priority
                 />
-                <div className="absolute bottom-0 w-48 h-8 bg-purple-500/30 rounded-full blur-xl"></div>
+                <div className="absolute bottom-0 w-48 h-8 bg-[#FFA500]/30 rounded-full blur-xl"></div>
               </div>
             </div>
             
@@ -287,7 +287,7 @@ export default function VaultPlay() {
           {/* Right column - 7 cols */}
           <div className="lg:col-span-7 flex flex-col space-y-4">
             {/* Scrambled text */}
-            <div className="text-right">
+            <div className="lg:text-right">
               <h2 className="text-white text-xl mb-1">QUESTS VERIFICATION</h2>
               <p className="text-gray-500 text-sm">COMPLETE THE FOLLOWING TASKS</p>
             </div>
@@ -383,7 +383,7 @@ export default function VaultPlay() {
                 <div className="flex-1">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="text-white text-sm font-medium tracking-wider">FOLLOW X.COM/CLUSTERPROTOCOL</h3>
+                      <h3 className="text-white text-xs sm:text-sm font-medium tracking-wider">FOLLOW X.COM/CLUSTERPROTOCOL</h3>
                       <p className="text-gray-500 text-xs mt-1 flex items-center">
                         <span className="inline-block w-5 h-5 rounded-full border border-gray-600 mr-2 flex items-center justify-center text-xs">✓</span>
                         FOLLOW NOW

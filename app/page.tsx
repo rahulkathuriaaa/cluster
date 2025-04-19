@@ -267,10 +267,10 @@ export default function Home() {
             </div>
             
             {/* Horizontal light beam */}
-            <div className="absolute h-[2px] left-0 right-0 top-1/2 -translate-y-1/2 z-10">
+            {/* <div className="absolute h-[2px] left-0 right-0 top-1/2 -translate-y-1/2 z-10">
               <div className="h-full w-full bg-gradient-to-r from-transparent via-primary to-transparent opacity-90"></div>
               <div className="h-4 w-full bg-gradient-to-r from-transparent via-primary to-transparent opacity-20 blur-md -mt-2"></div>
-            </div>
+            </div> */}
             
             {/* Circular glow behind the mascot */}
             <div className="absolute w-72 h-72 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/10 rounded-full blur-xl"></div>
@@ -300,7 +300,7 @@ export default function Home() {
               <div className="w-full h-20 mt-1 bg-gradient-to-b from-[#FFA500]/40 to-transparent rounded-full blur-lg"></div>
               
               {/* Ripple circles */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-[1px] border border-[#FFA500]/40 rounded-full animate-ripple" style={{ animationDelay: '0s' }}></div>
+              <div className="absolute top-0 left-full -translate-x-1/2 w-48 h-[1px] border border-[#FFA500]/40 rounded-full animate-ripple" style={{ animationDelay: '0s' }}></div>
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-[1px] border border-[#FFA500]/30 rounded-full animate-ripple" style={{ animationDelay: '0.5s' }}></div>
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-[1px] border border-[#FFA500]/20 rounded-full animate-ripple" style={{ animationDelay: '1s' }}></div>
             </div>
