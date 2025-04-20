@@ -1,0 +1,378 @@
+/* Futuristic tech panel styling */
+:root {
+    --gold: #ffd700;
+    --gold-dark: #b8860b;
+    --panel-bg: #000000;
+    --panel-border: #333333;
+    --text-gold: #ffd700;
+}
+
+/* Main container styling */
+.tech-container {
+    position: relative;
+    background-color: #000000;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Header styling */
+.tech-header {
+    position: relative;
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--panel-border);
+}
+
+.tech-header::before,
+.tech-header::after {
+    content: "";
+    position: absolute;
+    height: 1px;
+    background-color: var(--gold);
+    opacity: 0.5;
+    bottom: -1px;
+}
+
+.tech-header::before {
+    left: 0;
+    width: 30%;
+}
+
+.tech-header::after {
+    right: 0;
+    width: 30%;
+}
+
+/* Tech panel styling */
+.tech-panel {
+    position: relative;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    overflow: hidden;
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Panel header */
+.panel-header {
+    position: relative;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--panel-border);
+}
+
+.panel-header h2 {
+    color: var(--text-gold);
+    font-size: 1.2rem;
+    margin: 0;
+    padding: 0;
+    text-transform: uppercase;
+}
+
+/* Panel corners */
+.tech-panel::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 15px;
+    height: 15px;
+    border-top: 2px solid var(--gold);
+    border-left: 2px solid var(--gold);
+}
+
+.corner-tr {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 15px;
+    height: 15px;
+    border-top: 2px solid var(--gold);
+    border-right: 2px solid var(--gold);
+}
+
+.corner-bl {
+    position: absolute;
+    bottom: -1px;
+    left: -1px;
+    width: 15px;
+    height: 15px;
+    border-bottom: 2px solid var(--gold);
+    border-left: 2px solid var(--gold);
+}
+
+.corner-br {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 15px;
+    height: 15px;
+    border-bottom: 2px solid var(--gold);
+    border-right: 2px solid var(--gold);
+}
+
+/* Extended corners for side panels */
+.tech-panel .extended-corner-tl {
+    position: absolute;
+    top: -1px;
+    left: 15px;
+    width: 40px;
+    height: 1px;
+    background-color: var(--gold);
+}
+
+.tech-panel .extended-corner-tr {
+    position: absolute;
+    top: -1px;
+    right: 15px;
+    width: 40px;
+    height: 1px;
+    background-color: var(--gold);
+}
+
+.tech-panel .extended-corner-bl {
+    position: absolute;
+    bottom: -1px;
+    left: 15px;
+    width: 40px;
+    height: 1px;
+    background-color: var(--gold);
+}
+
+.tech-panel .extended-corner-br {
+    position: absolute;
+    bottom: -1px;
+    right: 15px;
+    width: 40px;
+    height: 1px;
+    background-color: var(--gold);
+}
+
+.tech-panel .extended-corner-lt {
+    position: absolute;
+    top: 15px;
+    left: -1px;
+    width: 1px;
+    height: 40px;
+    background-color: var(--gold);
+}
+
+.tech-panel .extended-corner-rt {
+    position: absolute;
+    top: 15px;
+    right: -1px;
+    width: 1px;
+    height: 40px;
+    background-color: var(--gold);
+}
+
+.tech-panel .extended-corner-lb {
+    position: absolute;
+    bottom: 15px;
+    left: -1px;
+    width: 1px;
+    height: 40px;
+    background-color: var(--gold);
+}
+
+.tech-panel .extended-corner-rb {
+    position: absolute;
+    bottom: 15px;
+    right: -1px;
+    width: 1px;
+    height: 40px;
+    background-color: var(--gold);
+}
+
+/* Circuit lines */
+.circuit-line {
+    position: absolute;
+    background-color: var(--panel-border);
+}
+
+.circuit-line.horizontal {
+    height: 1px;
+    left: 0;
+    right: 0;
+}
+
+.circuit-line.vertical {
+    width: 1px;
+    top: 0;
+    bottom: 0;
+}
+
+.circuit-line.gold {
+    background-color: var(--gold);
+    opacity: 0.3;
+}
+
+/* Gold button styling */
+.gold-button {
+    position: relative;
+    background: linear-gradient(to bottom, var(--gold), var(--gold-dark));
+    color: #000;
+    font-weight: bold;
+    border: none;
+    padding: 12px 20px;
+    text-transform: uppercase;
+    overflow: hidden;
+    border-radius: 0;
+    clip-path: polygon(
+        0 0,
+        calc(100% - 10px) 0,
+        100% 10px,
+        100% 100%,
+        10px 100%,
+        0 calc(100% - 10px)
+    );
+}
+
+.gold-button:hover {
+    background: linear-gradient(to bottom, #ffe44d, var(--gold));
+}
+
+.gold-button:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+}
+
+/* Chat message styling */
+.user-message {
+    background-color: var(--gold);
+    color: #000;
+    border-radius: 4px;
+    padding: 8px 12px;
+    max-width: 80%;
+    align-self: flex-end;
+}
+
+.assistant-message {
+    background-color: #111;
+    color: #fff;
+    border: 1px solid var(--panel-border);
+    border-radius: 4px;
+    padding: 8px 12px;
+    max-width: 80%;
+    align-self: flex-start;
+}
+
+/* Input field styling */
+.tech-input {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--panel-border);
+    color: #fff;
+    padding: 10px 15px;
+    width: 100%;
+    outline: none;
+}
+
+.tech-input:focus {
+    border-color: var(--gold);
+}
+
+/* Decorative elements */
+.tech-decorative-line {
+    position: absolute;
+    background-color: var(--panel-border);
+}
+
+.tech-decorative-line.horizontal {
+    height: 1px;
+    left: 0;
+    right: 0;
+}
+
+.tech-decorative-line.vertical {
+    width: 1px;
+    top: 0;
+    bottom: 0;
+}
+
+/* Status indicator */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    color: var(--text-gold);
+}
+
+.status-indicator .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-indicator .dot.active {
+    background-color: #00ff00;
+}
+
+.status-indicator .dot.inactive {
+    background-color: #ff0000;
+}
+
+/* Large number display */
+.large-number {
+    font-size: 8rem;
+    font-weight: bold;
+    color: var(--text-gold);
+    line-height: 1;
+    text-align: center;
+}
+
+/* Prize pool number display - smaller than attempts */
+.prize-number {
+    font-size: 5rem;
+    font-weight: bold;
+    color: var(--text-gold);
+    line-height: 1;
+    text-align: center;
+}
+
+/* Buy attempt button */
+.buy-attempt-button {
+    position: relative;
+    background: linear-gradient(to bottom, var(--gold), var(--gold-dark));
+    color: #000;
+    font-weight: bold;
+    border: none;
+    padding: 12px;
+    text-transform: uppercase;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+
+.buy-attempt-label {
+    background-color: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+/* Send button */
+.send-button {
+    background: linear-gradient(to bottom, var(--gold), var(--gold-dark));
+    color: #000;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    margin-left: 10px;
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        100% calc(100% - 10px),
+        calc(100% - 10px) 100%,
+        0 100%
+    );
+}
+
+.send-button:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+}
