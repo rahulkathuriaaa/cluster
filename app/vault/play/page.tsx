@@ -103,12 +103,12 @@ export default function VaultPlay() {
       }
       
       // Try programmatic navigation
-      router.push('/vault/play/gui');
+      router.push('/vault/play/how-to');
       
       // As a fallback, also try to redirect with a timeout
       setTimeout(() => {
         console.log("Fallback: using window.location");
-        window.location.href = '/vault/play/gui';
+        window.location.href = '/vault/play/how-to';
       }, 500);
     }
   };
@@ -439,7 +439,7 @@ export default function VaultPlay() {
             {/* Fallback link */}
             {allCompleted && (
               <div className="mt-2 text-center hidden">
-                <Link href="/vault/play/gui" className="text-yellow-400 underline hover:text-yellow-300 text-sm">
+                <Link href="/vault/play/how-to" className="text-yellow-400 underline hover:text-yellow-300 text-sm">
                   Go to Vault GUI
                 </Link>
               </div>

@@ -1,4 +1,5 @@
 // pages/index.js
+"use client"
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -134,7 +135,7 @@ export default function Home() {
                                     <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-400 to-amber-700 animate-pulse"></div>
                                     <div className="absolute inset-4 rounded-full bg-black flex items-center justify-center">
                                         <Image
-                                            src="/candy-face.png"
+                                            src="/mascot.png"
                                             alt="Candy Machine"
                                             width={150}
                                             height={150}
@@ -143,8 +144,14 @@ export default function Home() {
                                     </div>
                                 </div>
 
-                                <button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-16 rounded-md text-lg transition-all">
+                                <button className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-16 rounded-md text-lg transition-all"
+                                >
+                                    <Link href="/vault/play/how-to/gui">
                                     BEGIN
+                                    
+                                    </Link>
+                                    
+
                                 </button>
                             </div>
 

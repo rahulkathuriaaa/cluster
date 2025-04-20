@@ -2,9 +2,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function VaultSelection() {
   const [selectedVault, setSelectedVault] = useState(1);
+  const router = useRouter();
 
   const vaults = [
     {
@@ -74,7 +76,9 @@ export default function VaultSelection() {
         <p className="text-[#F3DDC6] max-w-2xl mx-auto mb-6 text-lg">
           Select an AI powered vault to undertake challenges and win rewards.
         </p>
-        <button className="bg-white text-black px-6 py-2 rounded-full font-medium hover:bg-gray-200 transition mb-16">
+        <button className="bg-white text-black px-6 py-2 rounded-full font-medium hover:bg-gray-200 transition mb-16"
+          onClick={() => router.push('/vault/play')}
+        >
           Play Now
         </button>
 
