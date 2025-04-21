@@ -738,7 +738,12 @@ export default function VaultPlay() {
                                             <div
                                                 className="ml-auto flex items-center justify-center cursor-pointer"
                                                 onClick={() =>
-                                                    signIn("twitter")
+                                                    signIn("twitter", {
+                                                        callbackUrl:
+                                                            window.location
+                                                                .origin +
+                                                            "/vault/play",
+                                                    })
                                                 }
                                             >
                                                 <span className="px-3 py-1 rounded border border-yellow-500/50 flex items-center justify-center bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 text-xs">

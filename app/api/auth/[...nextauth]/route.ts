@@ -28,11 +28,8 @@ const handler = NextAuth({
             version: "2.0", // Using Twitter OAuth 2.0
         }),
     ],
-    pages: {
-        signIn: "/auth/signin",
-        signOut: "/auth/signout",
-        error: "/auth/error",
-    },
+    // Add this to ensure the correct callback URL is used
+    secret: process.env.NEXT_AUTH_SECRET,
     debug: true, // Enable debug mode for troubleshooting
     callbacks: {
         async session({ session, token }) {
