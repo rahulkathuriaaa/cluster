@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import TwitterProvider from "next-auth/providers/twitter";
 
-// Define session type to include accessToken
+// Define session and JWT types to include accessToken
 declare module "next-auth" {
     interface Session {
         accessToken?: string;
@@ -11,6 +11,12 @@ declare module "next-auth" {
             email?: string;
             image?: string;
         };
+    }
+
+    interface JWT {
+        accessToken?: string;
+        profile?: any;
+        sub?: string;
     }
 }
 
@@ -33,7 +39,7 @@ const handler = NextAuth({
             console.log("[DEBUG AUTH] Session callback", {
                 tokenSub: token.sub,
                 tokenAccessToken: token.accessToken
-                    ? `${token.accessToken.substring(0, 10)}...`
+                    ? `${(token.accessToken as string).substring(0, 10)}...`
                     : undefined,
             });
             if (token) {
@@ -62,7 +68,10 @@ const handler = NextAuth({
                 console.log("[DEBUG AUTH] Added access_token to token", {
                     hasAccessToken: !!account.access_token,
                     tokenValue: account.access_token
-                        ? `${account.access_token.substring(0, 10)}...`
+                        ? `${(account.access_token as string).substring(
+                              0,
+                              10
+                          )}...`
                         : undefined,
                 });
             }

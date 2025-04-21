@@ -112,13 +112,15 @@ export async function GET(request: Request) {
             );
             console.log(
                 "[DEBUG API] Access token length:",
-                token.accessToken?.length || 0
+                token.accessToken ? (token.accessToken as string).length : 0
             );
 
             console.log("[DEBUG API] Making API request to Twitter");
             console.log(
                 "[DEBUG API] Using access token:",
-                token.accessToken?.substring(0, 10) + "..."
+                token.accessToken
+                    ? (token.accessToken as string).substring(0, 10) + "..."
+                    : ""
             );
 
             const response = await fetch(followsEndpoint, {
@@ -192,7 +194,7 @@ export async function GET(request: Request) {
             console.log("[DEBUG API] Response JSON:", responseJson);
 
             return NextResponse.json(responseJson);
-        } catch (error) {
+        } catch (error: any) {
             console.error("[DEBUG API] Error in direct follow check:", error);
 
             // If we're using a manually created token or a token from headers,
@@ -214,7 +216,9 @@ export async function GET(request: Request) {
                     clusterProtocolId,
                     fallback: true,
                     manualToken: true,
-                    debug: `Using manual token fallback due to error: ${error.message}`,
+                    debug: `Using manual token fallback due to error: ${
+                        error.message || "Unknown error"
+                    }`,
                 });
             } else {
                 // For normal token errors, don't assume following
@@ -223,8 +227,12 @@ export async function GET(request: Request) {
                     userId,
                     clusterProtocolId,
                     fallback: true,
-                    error: `Error checking follow status: ${error.message}`,
-                    debug: `Using fallback due to error: ${error.message}`,
+                    error: `Error checking follow status: ${
+                        error.message || "Unknown error"
+                    }`,
+                    debug: `Using fallback due to error: ${
+                        error.message || "Unknown error"
+                    }`,
                 });
             }
         }
@@ -233,15 +241,21 @@ export async function GET(request: Request) {
             "[DEBUG API] Outer catch - Error checking follow status:",
             error
         );
-        console.log("[DEBUG API] Error message:", error.message);
-        console.log("[DEBUG API] Error stack:", error.stack);
+        console.log(
+            "[DEBUG API] Error message:",
+            error.message || "Unknown error"
+        );
+        console.log(
+            "[DEBUG API] Error stack:",
+            error.stack || "No stack trace"
+        );
 
         // For general errors, use a more permissive fallback
         // This improves UX when there are server-side issues
         return NextResponse.json(
             {
                 error: error.message || "An error occurred",
-                stack: error.stack,
+                stack: error.stack || "No stack trace",
                 fallback: true,
                 isFollowing: true, // For general errors, assume following for better UX
                 generalError: true,
