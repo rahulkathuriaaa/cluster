@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  walletAddress String         @unique
+  credits       Int            @default(5)
+  lastActive    DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  conversations Conversation[]
+  transactions  Transaction[]
+}
+
+model Vault {
+  id             String         @id @default(cuid())
+  name           String
+  totalPrize     Float
+  availablePrize Float
+  vaultSponsor   String
+  sponsorLinks   String[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  conversations  Conversation[]
+  transactions   Transaction[]
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  amount    Float
+  timestamp DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  vaultId   String
+  vault     Vault    @relation(fields: [vaultId], references: [id])
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  messages  Json // Store the whole messages array as JSON
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  vaultId   String
+  vault     Vault    @relation(fields: [vaultId], references: [id])
+}

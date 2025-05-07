@@ -45,6 +45,10 @@ const CustomWalletInfo = () => {
 
     useEffect(() => {
         if (connected && account?.address) {
+            console.log(
+                "Wallet connected in CustomWalletInfo:",
+                account.address
+            );
             // Fetch balance from Aptos network
             fetch(
                 `https://fullnode.testnet.aptoslabs.com/v1/accounts/${account.address}/resources`
@@ -63,6 +67,7 @@ const CustomWalletInfo = () => {
                             parseInt(rawBalance) / 100000000
                         ).toFixed(4);
                         setBalance(formattedBalance);
+                        console.log("Wallet balance:", formattedBalance, "APT");
                     }
                 })
                 .catch((error) => {
@@ -70,6 +75,7 @@ const CustomWalletInfo = () => {
                 });
         } else {
             setBalance("0");
+            console.log("Wallet not connected in CustomWalletInfo");
         }
     }, [account, connected]);
 
@@ -136,8 +142,17 @@ type MessageType = {
     text: string;
 };
 
+// Define the expected message format from useChat
+interface Message {
+    id: string;
+    role: "user" | "assistant" | "system" | "function" | "data" | "tool";
+    content: string;
+    createdAt?: Date;
+}
+
 export default function ZuraVaultInterface() {
-    const { account, connected, signAndSubmitTransaction } = useWallet();
+    const { account, connected, signAndSubmitTransaction, wallet, wallets } =
+        useWallet();
 
     // Use our custom hook to prevent layout shift
     usePreventLayoutShift();
@@ -148,6 +163,10 @@ export default function ZuraVaultInterface() {
     const [buyAmount, setBuyAmount] = useState(1);
     const [isSendingAPT, setIsSendingAPT] = useState(false);
     const [showRules, setShowRules] = useState(false);
+    const [userId, setUserId] = useState("");
+    const [vaultId, setVaultId] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+    const [walletAddress, setWalletAddress] = useState("");
 
     // Ref for the messages container to enable auto-scrolling
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -159,15 +178,18 @@ export default function ZuraVaultInterface() {
         setInput,
         handleInputChange,
         handleSubmit: aiHandleSubmit,
-        isLoading,
+        isLoading: isChatLoading,
         setMessages,
     } = useChat({
         api: "/api/hello",
-        onError: (error) => {
+        onError: (error: any) => {
             console.error("Chat API error:", error);
         },
         onFinish: () => {
-            // If needed, perform actions when response is complete
+            // Save messages to database when response is complete
+            if (walletAddress && vaultId) {
+                saveConversation(messages);
+            }
         },
         streamMode: "text",
     });
@@ -180,156 +202,234 @@ export default function ZuraVaultInterface() {
     // Auto-scroll when conversation updates
     useEffect(() => {
         scrollToBottom();
-    }, [messages, isLoading]);
+    }, [messages, isChatLoading]);
 
-    // Save messages to localStorage whenever they change
-    useEffect(() => {
-        if (messages.length > 0) {
-            localStorage.setItem("chat_messages", JSON.stringify(messages));
-            console.log("Saved chat messages to localStorage", messages.length);
+    // Save conversation to database
+    const saveConversation = async (messagesData: Message[]) => {
+        try {
+            if (!walletAddress || !vaultId) {
+                console.error(
+                    "Missing walletAddress or vaultId for conversation"
+                );
+                return;
+            }
+
+            console.log("Saving conversation for wallet:", walletAddress);
+
+            await fetch("/api/conversations", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    walletAddress,
+                    vaultId,
+                    messages: messagesData,
+                }),
+            });
+        } catch (error: any) {
+            console.error("Error saving conversation:", error);
         }
-    }, [messages]);
+    };
 
-    // Load chat history from localStorage when component mounts
+    // Fetch or create user when wallet is connected
     useEffect(() => {
-        // Check if user has completed all tasks and has been awarded credits
-        const creditsAwarded = localStorage.getItem("credits_awarded");
-        const userCredits = localStorage.getItem("credits")
-            ? parseInt(localStorage.getItem("credits") || "0")
-            : 0;
+        const fetchOrCreateUser = async () => {
+            if (connected && account?.address) {
+                try {
+                    // Set wallet address for future API calls
+                    setWalletAddress(account.address);
+                    console.log("Wallet connected:", account.address);
 
-        console.log(
-            "GUI page loaded - Credits awarded:",
-            creditsAwarded,
-            "User credits:",
-            userCredits
-        );
+                    // Try to get existing user
+                    const response = await fetch(
+                        `/api/users?walletAddress=${account.address}`
+                    );
+
+                    const userData = await response.json();
+
+                    if (userData.error) {
+                        console.log("User not found, creating new user");
+                        // User doesn't exist, create a new one
+                        const createResponse = await fetch("/api/users", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                walletAddress: account.address,
+                            }),
+                        });
+
+                        if (createResponse.ok) {
+                            const newUser = await createResponse.json();
+                            setUserId(newUser.id);
+                            setCredits(newUser.credits);
+                            console.log("New user created:", newUser);
+                        }
+                    } else {
+                        // User exists
+                        setUserId(userData.id);
+                        setCredits(userData.credits);
+                        console.log("Existing user found:", userData);
+                    }
+                } catch (error) {
+                    console.error("Error fetching/creating user:", error);
+                }
+            }
+        };
+
+        fetchOrCreateUser();
+    }, [connected, account]);
+
+    // Get or create default vault
+    useEffect(() => {
+        const getOrCreateVault = async () => {
+            try {
+                // Try to get existing vaults
+                const response = await fetch("/api/vaults");
+
+                if (response.ok) {
+                    const vaults = await response.json();
+                    if (vaults.length > 0) {
+                        setVaultId(vaults[0].id);
+                        console.log("Using existing vault:", vaults[0]);
+                    } else {
+                        // Create a default vault
+                        const createResponse = await fetch("/api/vaults", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                name: "ZURA Vault",
+                                totalPrize: 1000,
+                                availablePrize: 1000,
+                                vaultSponsor: "Cluster",
+                                sponsorLinks: ["https://cluster.app"],
+                            }),
+                        });
+
+                        if (createResponse.ok) {
+                            const newVault = await createResponse.json();
+                            setVaultId(newVault.id);
+                            console.log("Created new vault:", newVault);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching/creating vault:", error);
+            }
+        };
+
+        getOrCreateVault();
+    }, []);
+
+    // Load conversation when walletAddress and vaultId are available
+    useEffect(() => {
+        const loadConversation = async () => {
+            if (walletAddress && vaultId) {
+                try {
+                    console.log(
+                        "Loading conversation for wallet:",
+                        walletAddress
+                    );
+                    const response = await fetch(
+                        `/api/conversations?walletAddress=${walletAddress}&vaultId=${vaultId}`
+                    );
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.messages && data.messages.length > 0) {
+                            console.log(
+                                "Loaded existing conversation:",
+                                data.messages.length,
+                                "messages"
+                            );
+                            setMessages(data.messages);
+                        } else {
+                            // Add initial messages if no conversation exists
+                            console.log(
+                                "No existing conversation, creating initial messages"
+                            );
+                            setMessages([
+                                {
+                                    id: "1",
+                                    role: "assistant",
+                                    content: "Hello!",
+                                },
+                                {
+                                    id: "2",
+                                    role: "assistant",
+                                    content:
+                                        "Greetings, participant. How can I assist?",
+                                },
+                            ]);
+                        }
+                    }
+                    setIsLoading(false);
+                } catch (error) {
+                    console.error("Error loading conversation:", error);
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        loadConversation();
+    }, [walletAddress, vaultId, setMessages]);
+
+    // Check if user completed tasks
+    useEffect(() => {
+        // Check if user has completed all tasks
+        const creditsAwarded = localStorage.getItem("credits_awarded");
 
         if (!creditsAwarded) {
             // Redirect back to tasks page if tasks not completed
             console.log("Tasks not completed, redirecting back");
             router.push("/vault/play");
-        } else {
-            // Set credits from localStorage
-            setCredits(userCredits);
-
-            // Try to load saved messages from localStorage
-            const savedMessages = localStorage.getItem("chat_messages");
-
-            if (savedMessages) {
-                try {
-                    const parsedMessages = JSON.parse(savedMessages);
-                    if (
-                        Array.isArray(parsedMessages) &&
-                        parsedMessages.length > 0
-                    ) {
-                        console.log(
-                            "Loaded saved chat messages from localStorage",
-                            parsedMessages.length
-                        );
-                        setMessages(parsedMessages);
-                        return;
-                    }
-                } catch (error) {
-                    console.error("Error parsing saved messages:", error);
-                    localStorage.removeItem("chat_messages");
-                }
-            }
-
-            // Add initial messages if no saved messages exist
-            if (messages.length === 0) {
-                setMessages([
-                    {
-                        id: "1",
-                        role: "assistant",
-                        content: "Hello!",
-                    },
-                    {
-                        id: "2",
-                        role: "assistant",
-                        content: "Greetings, participant. How can I assist?",
-                    },
-                ]);
-            }
         }
-    }, [router, messages.length, setMessages]);
+    }, [router]);
 
     // Custom handle submit to manage credits and handling
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!input.trim() || credits < 1 || !connected || isLoading) return;
+        if (
+            !input.trim() ||
+            credits < 1 ||
+            !connected ||
+            isChatLoading ||
+            !walletAddress
+        )
+            return;
 
         // Reduce credits
         const newCredits = credits - 1;
         setCredits(newCredits);
-        localStorage.setItem("credits", newCredits.toString());
+
+        // Update user credits in database
+        try {
+            const response = await fetch("/api/users/credits", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    walletAddress,
+                    amount: 1,
+                    operation: "remove",
+                }),
+            });
+
+            if (response.ok) {
+                console.log("Credits updated successfully");
+            }
+        } catch (error) {
+            console.error("Error updating credits:", error);
+        }
 
         // Let the AI library handle the API communication
         aiHandleSubmit(e);
-    };
-
-    // This function is currently unused but kept for potential future use
-    const handleBuyCredits = async () => {
-        if (!connected || !account?.address) return;
-
-        setIsBuying(true);
-
-        try {
-            const amount = buyAmount * 0.5; // 0.5 APT per credit
-
-            // Using type assertion to bypass type checking
-            const transaction = {
-                data: {
-                    function: "0x1::aptos_account::transfer",
-                    typeArguments: [],
-                    functionArguments: [
-                        "0xbb629c088b696f8c3500d0133692a1ad98a90baef9d957056ec4067523181e9a", // recipient address
-                        (amount * 100000000).toString(), // convert to octas (APT * 10^8)
-                    ],
-                },
-            } as any; // Type assertion to bypass type checking
-
-            const response = await signAndSubmitTransaction(transaction);
-
-            // Wait for transaction to confirm
-            await fetch(
-                `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${response.hash}`,
-                {
-                    method: "GET",
-                }
-            );
-
-            // Update credits
-            const newCredits = credits + buyAmount;
-            setCredits(newCredits);
-            localStorage.setItem("credits", newCredits.toString());
-
-            // Confirm purchase in conversation
-            setMessages([
-                ...messages,
-                {
-                    id: Date.now().toString(),
-                    role: "assistant",
-                    content: `Thank you for your purchase! ${buyAmount} credit${
-                        buyAmount > 1 ? "s" : ""
-                    } added to your balance.`,
-                },
-            ]);
-        } catch (error) {
-            console.error("Transaction failed:", error);
-            setMessages([
-                ...messages,
-                {
-                    id: Date.now().toString(),
-                    role: "assistant",
-                    content: "Transaction failed. Please try again later.",
-                },
-            ]);
-        } finally {
-            setIsBuying(false);
-            setBuyAmount(1);
-        }
     };
 
     const sendDonation = async () => {
@@ -365,20 +465,53 @@ export default function ZuraVaultInterface() {
                 }
             );
 
-            // Update credits
-            const newCredits = credits + 1;
-            setCredits(newCredits);
-            localStorage.setItem("credits", newCredits.toString());
+            // Record transaction and update credits
+            try {
+                // Record transaction
+                const txResponse = await fetch("/api/transactions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        walletAddress,
+                        vaultId,
+                        amount: 0.5,
+                    }),
+                });
+
+                if (txResponse.ok) {
+                    const txData = await txResponse.json();
+                    // Use credits from response
+                    if (txData.user && txData.user.credits !== undefined) {
+                        setCredits(txData.user.credits);
+                    } else {
+                        // Fallback - add 1 credit
+                        setCredits((prev) => prev + 1);
+                    }
+                    console.log("Transaction recorded successfully:", txData);
+                }
+            } catch (error) {
+                console.error("Error recording transaction:", error);
+                // Fallback - add 1 credit
+                setCredits((prev) => prev + 1);
+            }
 
             // Confirm purchase in conversation
-            setMessages([
+            const purchaseConfirmation: Message = {
+                id: Date.now().toString(),
+                role: "assistant",
+                content: `Thank you for your purchase! 1 credit added to your balance.`,
+            };
+
+            const updatedMessages: Message[] = [
                 ...messages,
-                {
-                    id: Date.now().toString(),
-                    role: "assistant",
-                    content: `Thank you for your purchase! 1 credit added to your balance.`,
-                },
-            ]);
+                purchaseConfirmation,
+            ];
+            setMessages(updatedMessages);
+
+            // Save updated conversation
+            saveConversation(updatedMessages);
         } catch (error) {
             console.error("Transaction failed:", error);
             setMessages([
@@ -458,6 +591,17 @@ export default function ZuraVaultInterface() {
             </div>
         </div>
     );
+
+    // Log wallet status on component mount and wallet change
+    useEffect(() => {
+        console.log("Wallet connection status:", connected);
+        console.log(
+            "Available wallets:",
+            wallets?.map((w) => w.name).join(", ") || "None"
+        );
+        console.log("Connected wallet:", wallet?.name);
+        console.log("Account address:", account?.address);
+    }, [connected, account, wallet, wallets]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-black text-white p-2 overflow-hidden relative tech-container">
@@ -671,7 +815,7 @@ export default function ZuraVaultInterface() {
                                         {msg.content}
                                     </div>
                                 ))}
-                                {isLoading && <TypingIndicator />}
+                                {isChatLoading && <TypingIndicator />}
                                 <div ref={messagesEndRef} />
                             </div>
                         </div>
@@ -686,7 +830,9 @@ export default function ZuraVaultInterface() {
                                     placeholder={getPlaceholderText()}
                                     className="tech-input"
                                     disabled={
-                                        credits < 1 || !connected || isLoading
+                                        credits < 1 ||
+                                        !connected ||
+                                        isChatLoading
                                     }
                                 />
                                 <button
@@ -695,13 +841,13 @@ export default function ZuraVaultInterface() {
                                         !input.trim() ||
                                         credits < 1 ||
                                         !connected ||
-                                        isLoading
+                                        isChatLoading
                                     }
                                     className={`send-button ${
                                         !input.trim() ||
                                         credits < 1 ||
                                         !connected ||
-                                        isLoading
+                                        isChatLoading
                                             ? "disabled"
                                             : ""
                                     }`}
