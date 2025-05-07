@@ -24,8 +24,8 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+-   [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+-   [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
@@ -34,3 +34,49 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Database Setup (PostgreSQL)
+
+The application now uses PostgreSQL for storing user conversations, user information, vaults and transactions.
+
+### Setup Instructions
+
+1. Install PostgreSQL on your machine or use a cloud provider
+2. Create a new database for the application
+3. Update `.env` file with your database connection string:
+    ```
+    DATABASE_URL="postgresql://username:password@localhost:5432/database_name?schema=public"
+    ```
+4. Run the Prisma migrations:
+    ```
+    npx prisma migrate dev --name init
+    ```
+5. Generate the Prisma client:
+    ```
+    npx prisma generate
+    ```
+
+### Database Schema
+
+The database includes the following models:
+
+-   **User**: Stores wallet address, credits, and activity timestamps
+-   **Vault**: Represents a challenge vault with prize information
+-   **Transaction**: Records APT transactions for buying credits
+-   **Conversation**: Stores chat history between users and vaults
+
+### API Endpoints
+
+The following API endpoints are available for database interactions:
+
+-   `/api/users` - Create, retrieve, and update users
+-   `/api/vaults` - Create, retrieve, and update vaults
+-   `/api/transactions` - Record and retrieve transactions
+-   `/api/conversations` - Save and retrieve conversation history
+
+### Implementation Notes
+
+-   Conversations are now stored in the database instead of localStorage
+-   User credits are persisted between sessions
+-   Transaction history is maintained for all credit purchases
+-   Vault information is centralized and configurable
