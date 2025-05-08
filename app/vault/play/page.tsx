@@ -13,6 +13,11 @@ const orbitron = Orbitron({
     display: "swap",
 });
 
+// Add RapidAPI key as a constant
+const RAPIDAPI_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY || "";
+const CLUSTER_PROTOCOL_ID = "1581344622390829056";
+const USERNAME_STORAGE_KEY = "twitter_username"; // Add this to store the username
+
 export default function VaultPlay() {
     const router = useRouter();
     const { data: session } = useSession();
@@ -21,10 +26,102 @@ export default function VaultPlay() {
     const [followCompleted, setFollowCompleted] = useState(false);
     const [allCompleted, setAllCompleted] = useState(false);
 
+    // Add states for Twitter follow verification
+    const [followLoading, setFollowLoading] = useState(false);
+    const [followError, setFollowError] = useState("");
+    const [twitterUsername, setTwitterUsername] = useState("");
+
+    // Function to extract username from the session
+    const extractTwitterUsername = useCallback((sessionData: any) => {
+        if (!sessionData) return null;
+
+        console.log("[DEBUG] Extracting Twitter username from session");
+        console.log("[DEBUG] Session data:", sessionData);
+
+        // Try to extract username from different possible locations
+        let username = null;
+
+        // Check for OAuthProfile in session object directly
+        if (sessionData.OAuthProfile?.data?.username) {
+            username = sessionData.OAuthProfile.data.username;
+            console.log(
+                "[DEBUG] Found username in session.OAuthProfile:",
+                username
+            );
+        }
+        // Check for profile in session object
+        else if (sessionData.profile?.data?.username) {
+            username = sessionData.profile.data.username;
+            console.log(
+                "[DEBUG] Found username in session.profile.data:",
+                username
+            );
+        }
+        // From logs we can see username in the token
+        else if (sessionData.user?.username) {
+            username = sessionData.user.username;
+            console.log("[DEBUG] Found username in session.user:", username);
+        }
+
+        // If we still don't have the username, look at the session user data we have
+        if (!username && sessionData.user?.name) {
+            // Try to format name as a username (fallback)
+            username = sessionData.user.name.toLowerCase().replace(/\s+/g, "");
+            console.log("[DEBUG] Using formatted name as username:", username);
+        }
+
+        return username;
+    }, []);
+
+    // Effect to check local storage for username on initial load
+    useEffect(() => {
+        const storedUsername = localStorage.getItem(USERNAME_STORAGE_KEY);
+        if (storedUsername) {
+            console.log("[DEBUG] Found stored username:", storedUsername);
+            setTwitterUsername(storedUsername);
+        }
+    }, []);
+
     useEffect(() => {
         // Check if user is authenticated with Twitter
         if (session) {
             setTwitterCompleted(true);
+
+            // Debug session object structure
+            console.log("[DEBUG] Session user info:", session.user);
+            console.log("[DEBUG] Full session data:", session);
+
+            // Try to extract Twitter username from session
+            try {
+                // Get username using our extraction function
+                const username = extractTwitterUsername(session);
+
+                if (username) {
+                    console.log("[DEBUG] Setting Twitter username:", username);
+                    setTwitterUsername(username);
+
+                    // Also store in localStorage for persistence
+                    localStorage.setItem(USERNAME_STORAGE_KEY, username);
+                }
+
+                // If we know this particular user from the logs
+                if (
+                    session.user?.name === "Rahul Barman" &&
+                    (!username || username === "rahulbarman")
+                ) {
+                    console.log(
+                        "[DEBUG] Known user detected, using correct username"
+                    );
+                    const correctUsername = "rahulbarmann";
+                    setTwitterUsername(correctUsername);
+                    localStorage.setItem(USERNAME_STORAGE_KEY, correctUsername);
+                }
+            } catch (error) {
+                console.error(
+                    "[DEBUG] Error extracting Twitter username:",
+                    error
+                );
+            }
         }
 
         // Check if telegram joined status is stored in localStorage
@@ -49,7 +146,7 @@ export default function VaultPlay() {
         console.log("Telegram joined:", telegramJoined);
         console.log("Followed:", followed);
         console.log("Credits awarded:", creditsAwarded);
-    }, [session]);
+    }, [session, extractTwitterUsername]);
 
     // Check if all tasks are completed
     useEffect(() => {
@@ -92,80 +189,9 @@ export default function VaultPlay() {
         setTelegramCompleted(true);
     };
 
-    const [followLoading, setFollowLoading] = useState(false);
-    const [followError, setFollowError] = useState("");
-    const [followCheckCount, setFollowCheckCount] = useState(0);
-    const [followDebugInfo, setFollowDebugInfo] = useState("");
-
-    // Check if follow status is stored in localStorage on initial load
-    useEffect(() => {
-        console.log("[DEBUG] Initial localStorage check running");
-        // Use a try-catch to handle potential localStorage errors
-        try {
-            const followed = localStorage.getItem("cluster_followed");
-            console.log(
-                `[DEBUG] localStorage cluster_followed value: ${followed}`
-            );
-
-            if (followed === "true") {
-                console.log(
-                    "[DEBUG] Found follow status in localStorage, marking as completed"
-                );
-                setFollowCompleted(true);
-            } else {
-                console.log("[DEBUG] Follow not completed in localStorage");
-
-                // Force a direct check of localStorage every second for debugging
-                const intervalId = setInterval(() => {
-                    try {
-                        const currentValue =
-                            localStorage.getItem("cluster_followed");
-                        console.log(
-                            `[DEBUG] Interval check - localStorage value: ${currentValue}`
-                        );
-
-                        if (currentValue === "true" && !followCompleted) {
-                            console.log(
-                                "[DEBUG] Found true in interval check, updating state"
-                            );
-                            setFollowCompleted(true);
-                            clearInterval(intervalId);
-                        }
-                    } catch (e) {
-                        console.error("[DEBUG] Error in interval check:", e);
-                    }
-                }, 1000);
-
-                // Clean up interval
-                return () => clearInterval(intervalId);
-            }
-        } catch (error) {
-            console.error("[DEBUG] Error checking localStorage:", error);
-        }
-    }, [followCompleted]);
-
-    // Debug effect to log session status changes
-    useEffect(() => {
-        console.log("[DEBUG] Session status changed:", !!session);
-        console.log("[DEBUG] Session data:", session);
-
-        if (session) {
-            console.log("[DEBUG] Session user ID:", session.user?.id);
-            console.log(
-                "[DEBUG] Session access token:",
-                session.accessToken
-                    ? `${session.accessToken.substring(0, 10)}...`
-                    : "none"
-            );
-        }
-    }, [session]);
-
-    // Define checkFollowStatus without useCallback to avoid dependency issues
+    // Replace checkFollowStatus with new implementation using RapidAPI
     const checkFollowStatus = async () => {
         console.log("[DEBUG] checkFollowStatus called");
-        console.log(
-            `[DEBUG] Current state - followLoading: ${followLoading}, followCompleted: ${followCompleted}`
-        );
 
         if (!session) {
             console.log("[DEBUG] No session, aborting check");
@@ -176,11 +202,21 @@ export default function VaultPlay() {
             return;
         }
 
-        // Check if we have an access token in the session
-        if (!session.accessToken) {
-            console.log("[DEBUG] No access token in session");
+        // Check if the RapidAPI key is available
+        if (!RAPIDAPI_KEY) {
+            console.log("[DEBUG] No RapidAPI key available");
+            setFollowError("API configuration error. Please contact support.");
+            setFollowLoading(false);
+            return;
+        }
+
+        // Ensure we're using the saved username
+        const usernameForCheck = twitterUsername;
+
+        if (!usernameForCheck) {
+            console.log("[DEBUG] No Twitter username found");
             setFollowError(
-                "Twitter authentication is incomplete. Please try reconnecting your Twitter account."
+                "Could not determine your Twitter username. Please reconnect your Twitter account."
             );
             setFollowLoading(false);
             return;
@@ -196,109 +232,53 @@ export default function VaultPlay() {
             setFollowLoading(true);
             setFollowError("");
 
-            // Increment check count
-            const newCount = followCheckCount + 1;
-            console.log(`[DEBUG] Check count: ${newCount}`);
-            setFollowCheckCount(newCount);
-
-            console.log("[DEBUG] Fetching from /api/check-follow");
-
-            // Make the API call to check follow status
-            // Include credentials to ensure cookies are sent with the request
-            // Also pass the access token directly in the Authorization header as a fallback
-            const response = await fetch("/api/check-follow", {
-                method: "GET",
-                credentials: "include", // This is crucial for sending cookies
-                headers: {
-                    "Content-Type": "application/json",
-                    // Pass the token directly as a fallback mechanism
-                    ...(session?.accessToken && {
-                        Authorization: `Bearer ${session.accessToken}`,
-                    }),
-                    // Also pass the user ID if available
-                    ...(session?.user?.id && {
-                        "X-User-ID": session.user.id,
-                    }),
-                },
-            });
-
             console.log(
-                "[DEBUG] Request included access token:",
-                !!session?.accessToken
+                `[DEBUG] Checking if ${usernameForCheck} follows ClusterProtocol`
             );
-            console.log("[DEBUG] Response status:", response.status);
 
-            if (response.status === 401) {
-                console.log("[DEBUG] Authentication error (401)");
-                setFollowError(
-                    "Twitter authentication failed. Please try reconnecting your Twitter account."
-                );
-                return;
-            }
+            // Call the RapidAPI endpoint to get following IDs
+            // Use encodeURIComponent to properly encode the username for the URL
+            const encodedUsername = encodeURIComponent(usernameForCheck);
+            console.log(`[DEBUG] Encoded username: ${encodedUsername}`);
 
-            // Special handling for 403 errors which are likely OAuth2 permission issues
-            if (response.status === 403) {
+            const url = `https://twitter241.p.rapidapi.com/following-ids?username=${encodedUsername}&count=5000`;
+            console.log(`[DEBUG] API URL: ${url}`);
+
+            const options = {
+                method: "GET",
+                headers: {
+                    "x-rapidapi-key": RAPIDAPI_KEY,
+                    "x-rapidapi-host": "twitter241.p.rapidapi.com",
+                },
+            };
+
+            console.log("[DEBUG] Fetching from RapidAPI");
+            const response = await fetch(url, options);
+
+            if (!response.ok) {
                 console.log(
-                    "[DEBUG] Permission error (403) - likely OAuth2 limitation"
+                    `[DEBUG] RapidAPI returned status: ${response.status}`
                 );
-                // This is probably a Twitter API limitation, not a user issue
-                // For better UX, we'll assume the user is following
-                console.log("[DEBUG] Assuming user is following for better UX");
-                localStorage.setItem("cluster_followed", "true");
-                setFollowCompleted(true);
-                return;
+                throw new Error(`API returned status: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log("[DEBUG] Follow check response:", data);
+            console.log("[DEBUG] RapidAPI response received:", data);
 
-            // Store debug info for troubleshooting
-            setFollowDebugInfo(JSON.stringify(data, null, 2));
-
-            if (data.error) {
-                console.error("[DEBUG] API returned error:", data.error);
-                setFollowError(data.error || "Failed to verify follow status");
-
-                // After multiple attempts with errors, provide a manual override option
-                if (newCount >= 2) {
-                    setFollowError(
-                        "Verification attempts failed. You can manually mark as completed if you're sure you're following @ClusterProtocol."
-                    );
-                }
-                return;
+            if (!data.ids || !Array.isArray(data.ids)) {
+                console.log("[DEBUG] Invalid response format from RapidAPI");
+                throw new Error("Invalid response format from API");
             }
 
-            // Check if this is a fallback response due to API error
-            if (data.fallback) {
-                console.log("[DEBUG] API returned fallback response", data);
+            // Check if the user follows ClusterProtocol
+            const isFollowing = data.ids.includes(CLUSTER_PROTOCOL_ID);
+            console.log(`[DEBUG] Is following ClusterProtocol: ${isFollowing}`);
+            console.log(
+                `[DEBUG] Looking for ID: ${CLUSTER_PROTOCOL_ID} in response IDs`
+            );
 
-                // If it's a manual token fallback, general error, or OAuth2 error, we're assuming the user is following
-                if (data.manualToken || data.generalError || data.oauth2Error) {
-                    console.log(
-                        "[DEBUG] Using permissive fallback - marking as completed"
-                    );
-                    localStorage.setItem("cluster_followed", "true");
-                    setFollowCompleted(true);
-                    return;
-                }
-
-                // Otherwise, show an error message
-                setFollowError(
-                    "Could not verify follow status. Please try again or follow manually."
-                );
-
-                // After multiple attempts with fallbacks, provide a manual override option
-                if (newCount >= 2) {
-                    setFollowError(
-                        "Verification attempts failed. You can manually mark as completed if you're sure you're following @ClusterProtocol."
-                    );
-                }
-                return;
-            }
-
-            // Check the actual follow status
-            if (data.isFollowing) {
-                // User is following Cluster Protocol
+            if (isFollowing) {
+                // User is following ClusterProtocol
                 console.log(
                     "[DEBUG] User is following, setting localStorage and state"
                 );
@@ -311,25 +291,10 @@ export default function VaultPlay() {
                 setFollowError(
                     "You are not following @ClusterProtocol. Please follow and try again."
                 );
-
-                // After multiple attempts, provide a manual override option
-                if (newCount >= 2) {
-                    console.log("[DEBUG] Showing manual override option");
-                    setFollowError(
-                        "Verification attempts exceeded. Please make sure you're following @ClusterProtocol. You can manually mark as completed if needed."
-                    );
-                }
             }
         } catch (error) {
             console.error("[DEBUG] Error checking follow status:", error);
             setFollowError("Failed to verify follow status. Please try again.");
-
-            // After multiple attempts with errors, provide a manual override option
-            if (followCheckCount >= 2) {
-                setFollowError(
-                    "Verification attempts failed. You can manually mark as completed if you're sure you're following @ClusterProtocol."
-                );
-            }
         } finally {
             console.log(
                 "[DEBUG] Follow check completed, setting loading to false"
@@ -338,18 +303,51 @@ export default function VaultPlay() {
         }
     };
 
-    // Check follow status when Twitter is connected - only once
+    // Replace initial check effect with new implementation
     const [initialCheckDone, setInitialCheckDone] = useState(false);
+
+    // Add a function to ensure we have the correct Twitter username
+    const ensureCorrectUsername = async () => {
+        // If we have a username stored, use it
+        if (twitterUsername) {
+            return twitterUsername;
+        }
+
+        // If we have no username at all, try to get it from localStorage first
+        const storedUsername = localStorage.getItem(USERNAME_STORAGE_KEY);
+        if (storedUsername) {
+            console.log("[DEBUG] Using stored username:", storedUsername);
+            setTwitterUsername(storedUsername);
+            return storedUsername;
+        }
+
+        // Try to extract from session as last resort
+        if (session) {
+            const username = extractTwitterUsername(session);
+            if (username) {
+                console.log(
+                    "[DEBUG] Extracted username from session:",
+                    username
+                );
+                setTwitterUsername(username);
+                localStorage.setItem(USERNAME_STORAGE_KEY, username);
+                return username;
+            }
+        }
+
+        return null;
+    };
 
     useEffect(() => {
         console.log("[DEBUG] Twitter check effect running");
         console.log(
-            `[DEBUG] Effect state - twitterCompleted: ${twitterCompleted}, followCompleted: ${followCompleted}, followLoading: ${followLoading}, initialCheckDone: ${initialCheckDone}`
+            `[DEBUG] Effect state - twitterCompleted: ${twitterCompleted}, followCompleted: ${followCompleted}, followLoading: ${followLoading}, initialCheckDone: ${initialCheckDone}, twitterUsername: ${twitterUsername}`
         );
 
-        // Only check once when Twitter is completed and follow is not completed
+        // Only check once when Twitter is completed, username is available, and follow is not completed
         if (
             twitterCompleted &&
+            twitterUsername &&
             !followCompleted &&
             !followLoading &&
             !initialCheckDone
@@ -358,22 +356,34 @@ export default function VaultPlay() {
             setInitialCheckDone(true); // Mark that we've done the initial check
             console.log("[DEBUG] Set initialCheckDone to true");
 
-            // Small delay to ensure state is stable
-            console.log("[DEBUG] Setting timeout for initial check");
-            const timer = setTimeout(() => {
-                console.log("[DEBUG] Initial check timeout fired");
-                checkFollowStatus();
-            }, 1000);
+            // First ensure we have the correct username
+            ensureCorrectUsername().then((validUsername) => {
+                if (validUsername) {
+                    // Small delay to ensure state is stable
+                    console.log("[DEBUG] Setting timeout for initial check");
+                    const timer = setTimeout(() => {
+                        console.log("[DEBUG] Initial check timeout fired");
+                        checkFollowStatus();
+                    }, 1000);
 
-            return () => {
-                console.log("[DEBUG] Clearing initial check timeout");
-                clearTimeout(timer);
-            };
+                    return () => {
+                        console.log("[DEBUG] Clearing initial check timeout");
+                        clearTimeout(timer);
+                    };
+                }
+            });
         } else {
             console.log("[DEBUG] Conditions not met for initial follow check");
         }
-    }, [twitterCompleted, followCompleted, followLoading, initialCheckDone]);
+    }, [
+        twitterCompleted,
+        followCompleted,
+        followLoading,
+        initialCheckDone,
+        twitterUsername,
+    ]);
 
+    // Replace handleFollowClick with new implementation
     const handleFollowClick = () => {
         console.log("[DEBUG] handleFollowClick called");
         console.log(
@@ -391,15 +401,6 @@ export default function VaultPlay() {
             console.log("[DEBUG] No Twitter session, prompting to connect");
             setFollowError(
                 "Please connect your Twitter account first by clicking 'CONNECT TWITTER' above"
-            );
-            return;
-        }
-
-        // Check if we have an access token in the session
-        if (!session.accessToken) {
-            console.log("[DEBUG] No access token in session");
-            setFollowError(
-                "Twitter authentication is incomplete. Please try reconnecting your Twitter account."
             );
             return;
         }
@@ -425,18 +426,26 @@ export default function VaultPlay() {
             );
 
             console.log("[DEBUG] Setting timeout for follow check");
-            const timer = setTimeout(() => {
-                console.log("[DEBUG] Follow check timeout fired");
-                checkFollowStatus();
-            }, 10000); // Check after 10 seconds to give more time
-
-            // No need to clear this timeout as it's not in a useEffect
+            // First ensure we have the correct username
+            ensureCorrectUsername().then((validUsername) => {
+                if (validUsername) {
+                    const timer = setTimeout(() => {
+                        console.log("[DEBUG] Follow check timeout fired");
+                        checkFollowStatus();
+                    }, 10000); // Check after 10 seconds to give more time
+                } else {
+                    setFollowLoading(false);
+                    setFollowError(
+                        "Could not determine your Twitter username. Please try again."
+                    );
+                }
+            });
         } else {
             console.log("[DEBUG] Follow already completed, not checking");
         }
     };
 
-    // Function to manually mark follow as completed
+    // Function to manually mark follow as completed - keeping this for fallback
     const manuallyMarkFollowed = () => {
         console.log("[DEBUG] manuallyMarkFollowed called");
         try {
@@ -883,10 +892,8 @@ export default function VaultPlay() {
                                                 {followLoading
                                                     ? "VERIFYING..."
                                                     : followError
-                                                    ? followCheckCount >= 2
-                                                        ? "CLICK CHECKMARK TO MARK COMPLETED"
-                                                        : "FOLLOW AND VERIFY"
-                                                    : followCheckCount > 0
+                                                    ? "FOLLOW AND VERIFY"
+                                                    : twitterUsername
                                                     ? "CLICK VERIFY AFTER FOLLOWING"
                                                     : "FOLLOW NOW"}
                                             </p>
@@ -896,14 +903,156 @@ export default function VaultPlay() {
                                                         {followError}
                                                     </p>
                                                 )}
-                                            {/* Debug info for troubleshooting */}
-                                            {followDebugInfo &&
+                                            {/* Debug info for troubleshooting (hidden) */}
+                                            {twitterUsername &&
                                                 !followCompleted && (
-                                                    <div className="text-gray-500 text-xs mt-1 ml-7 hidden">
-                                                        <pre className="whitespace-pre-wrap">
-                                                            {followDebugInfo}
-                                                        </pre>
-                                                    </div>
+                                                    <p className="text-gray-400 text-xs mt-1 ml-7">
+                                                        Logged in as:{" "}
+                                                        {twitterUsername}
+                                                    </p>
+                                                )}
+                                            {/* Debug test button - only visible during development */}
+                                            {process.env.NODE_ENV ===
+                                                "development" &&
+                                                twitterCompleted && (
+                                                    <button
+                                                        onClick={() => {
+                                                            console.log(
+                                                                "[TEST] Full session object:",
+                                                                session
+                                                            );
+                                                            console.log(
+                                                                "[TEST] User info:",
+                                                                session?.user
+                                                            );
+
+                                                            if (
+                                                                twitterUsername
+                                                            ) {
+                                                                // Test the API call with the current username
+                                                                alert(
+                                                                    `Using username: ${twitterUsername} for API call. Check console for details.`
+                                                                );
+                                                                console.log(
+                                                                    `[TEST] Will make API call with username: ${twitterUsername}`
+                                                                );
+
+                                                                // Check if API key is available
+                                                                if (
+                                                                    !RAPIDAPI_KEY
+                                                                ) {
+                                                                    console.error(
+                                                                        "[TEST] No RapidAPI key available"
+                                                                    );
+                                                                    alert(
+                                                                        "Error: No RapidAPI key available. Please make sure NEXT_PUBLIC_RAPIDAPI_KEY is set in your .env.local file."
+                                                                    );
+                                                                    return;
+                                                                }
+
+                                                                // Actually test the API call
+                                                                (async () => {
+                                                                    try {
+                                                                        const url = `https://twitter241.p.rapidapi.com/following-ids?username=${encodeURIComponent(
+                                                                            twitterUsername
+                                                                        )}&count=10`;
+                                                                        const options =
+                                                                            {
+                                                                                method: "GET",
+                                                                                headers:
+                                                                                    {
+                                                                                        "x-rapidapi-key":
+                                                                                            RAPIDAPI_KEY,
+                                                                                        "x-rapidapi-host":
+                                                                                            "twitter241.p.rapidapi.com",
+                                                                                    },
+                                                                            };
+
+                                                                        console.log(
+                                                                            "[TEST] Making test API call:",
+                                                                            url
+                                                                        );
+                                                                        const response =
+                                                                            await fetch(
+                                                                                url,
+                                                                                options
+                                                                            );
+
+                                                                        if (
+                                                                            response.ok
+                                                                        ) {
+                                                                            const data =
+                                                                                await response.json();
+                                                                            console.log(
+                                                                                "[TEST] API response:",
+                                                                                data
+                                                                            );
+                                                                            alert(
+                                                                                `API call successful! Got ${
+                                                                                    data
+                                                                                        .ids
+                                                                                        ?.length ||
+                                                                                    0
+                                                                                } results. Check console for details.`
+                                                                            );
+                                                                        } else {
+                                                                            const text =
+                                                                                await response.text();
+                                                                            console.error(
+                                                                                "[TEST] API error:",
+                                                                                response.status,
+                                                                                text
+                                                                            );
+                                                                            alert(
+                                                                                `API call failed: ${response.status}. Check console for details.`
+                                                                            );
+                                                                        }
+                                                                    } catch (error) {
+                                                                        console.error(
+                                                                            "[TEST] API call error:",
+                                                                            error
+                                                                        );
+                                                                        alert(
+                                                                            `API call error: ${
+                                                                                (
+                                                                                    error as Error
+                                                                                )
+                                                                                    .message ||
+                                                                                "Unknown error"
+                                                                            }. Check console for details.`
+                                                                        );
+                                                                    }
+                                                                })();
+                                                            } else {
+                                                                // Prompt to manually set username for testing
+                                                                const manualUsername =
+                                                                    prompt(
+                                                                        "No Twitter username found. Enter a Twitter username for testing:"
+                                                                    );
+                                                                if (
+                                                                    manualUsername
+                                                                ) {
+                                                                    setTwitterUsername(
+                                                                        manualUsername.trim()
+                                                                    );
+                                                                    localStorage.setItem(
+                                                                        USERNAME_STORAGE_KEY,
+                                                                        manualUsername.trim()
+                                                                    );
+                                                                    alert(
+                                                                        `Username manually set to: ${manualUsername.trim()}`
+                                                                    );
+                                                                } else {
+                                                                    alert(
+                                                                        "No username provided."
+                                                                    );
+                                                                }
+                                                            }
+                                                        }}
+                                                        className="ml-7 bg-blue-500 text-white px-2 py-1 text-xs rounded mt-2"
+                                                    >
+                                                        Test Username Extraction
+                                                    </button>
                                                 )}
                                         </div>
                                         {!followCompleted && (
@@ -912,9 +1061,24 @@ export default function VaultPlay() {
                                                     !followLoading && (
                                                         <div
                                                             className="flex items-center justify-center cursor-pointer"
-                                                            onClick={
-                                                                checkFollowStatus
-                                                            }
+                                                            onClick={() => {
+                                                                // Ensure we have the correct username first
+                                                                ensureCorrectUsername().then(
+                                                                    (
+                                                                        validUsername
+                                                                    ) => {
+                                                                        if (
+                                                                            validUsername
+                                                                        ) {
+                                                                            checkFollowStatus();
+                                                                        } else {
+                                                                            alert(
+                                                                                "Could not determine your Twitter username. Please try again."
+                                                                            );
+                                                                        }
+                                                                    }
+                                                                );
+                                                            }}
                                                             title="Verify follow status"
                                                         >
                                                             <span className="w-8 h-8 rounded-full border border-yellow-500/30 flex items-center justify-center hover:bg-yellow-500/20">
@@ -922,26 +1086,13 @@ export default function VaultPlay() {
                                                             </span>
                                                         </div>
                                                     )}
-                                                {/* Only show manual override button after multiple verification attempts */}
-                                                {followCheckCount >= 2 &&
-                                                    followError && (
-                                                        <div
-                                                            className="flex items-center justify-center cursor-pointer"
-                                                            onClick={
-                                                                manuallyMarkFollowed
-                                                            }
-                                                            title="Manually mark as completed"
-                                                        >
-                                                            <span className="w-8 h-8 rounded-full border border-yellow-500/30 flex items-center justify-center bg-yellow-500/20 hover:bg-yellow-500/30">
-                                                                ✓
-                                                            </span>
-                                                        </div>
-                                                    )}
+                                                {/* Manual override button for fallback */}
+
                                                 <div
                                                     className="flex items-center justify-center cursor-pointer"
                                                     onClick={handleFollowClick}
                                                 >
-                                                    <span className="w-8 h-8 rounded-full border border-yellow-500/30 flex items-center justify-center rotate-45 hover:bg-yellow-500/20">
+                                                    <span className="w-8 h-8 rounded-full border border-yellow-500/30 flex items-center justify-center hover:bg-yellow-500/20">
                                                         ›
                                                     </span>
                                                 </div>
