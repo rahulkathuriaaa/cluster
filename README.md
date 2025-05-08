@@ -1,17 +1,34 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+# Cluster Protocol
+
+## Required Environment Variables
+
+Create a `.env.local` file in the root directory with the following environment variables:
+
+```
+# RapidAPI Key for Twitter following verification
+NEXT_PUBLIC_RAPIDAPI_KEY=your_rapidapi_key_here
+```
+
+You can obtain a RapidAPI key by subscribing to the Twitter API on RapidAPI.com.
+
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
