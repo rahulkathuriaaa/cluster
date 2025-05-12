@@ -1,5 +1,6 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+Product explaination document - https://docs.google.com/document/d/1amgiGHd996RUazSa5XB3WUuSN0CJrXnz8cPW4mqjK4E/edit?usp=sharing
 # Cluster Protocol
 
 ## Required Environment Variables
